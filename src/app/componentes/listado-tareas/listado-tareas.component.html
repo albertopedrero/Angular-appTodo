@@ -1,0 +1,6 @@
+<app-tarea class="list-group-item" 
+            *ngFor='let tarea of listaTareas' 
+            [tarea]='tarea'
+            (tareaEliminada)='eliminarTarea($event)'
+            (tareaModificada)='modificarTarea($event)'>
+</app-tarea>
