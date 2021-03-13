@@ -1,53 +1,36 @@
 import { Injectable } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
+import { Tarea } from '../modelos/tarea.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TareasService {
 
-  listaTareas=[
-    {
-      nombre: 'Comprar tinta impresora',
-      completada: false
-    },
-    {
-      nombre: 'Renovar libros biblioteca',
-      completada: false
-    },
-    {
-      nombre: 'Completar trabajo SPW',
-      completada: false
-    },
-    {
-      nombre: 'Felicitar primo',
-      completada: false
-    }
-  ]
+  
+  constructor( private firestore: AngularFirestore  ) {}
 
-  constructor() { }
-
-  obtenerTareas(){
-    return this.listaTareas;
+  obtenerTareas(): Observable<any[]>{
+    return this.firestore.collection('tareas').snapshotChanges();
   }
 
-  anadirTarea(tarea){
-    let nuevaTarea = {
-      nombre: tarea,
-      completada: false
-    }
-    this.listaTareas.unshift(nuevaTarea);
+  anadirTarea(tarea: Tarea){
+    let nuevaTarea = Object.assign( {}, {'nombre': tarea, 'completada': false});
+    return this.firestore.collection('tareas').add(nuevaTarea);
   }
 
-  eliminarTarea(tarea){
-    let posicion = this.listaTareas.findIndex( t => t.nombre === tarea.nombre);
-    //                              function(t) { return t.nombre === tarea.nombre }
-
-    this.listaTareas.splice(posicion, 1);
-
+  eliminarTarea(tarea:Tarea){
+    this.firestore.doc('tareas/' + tarea.id).delete();
+    // O también
+    // this.firestore.collection('tareas').doc(tarea.id).delete();
   }
 
-  modificarTarea(tarea){
-    let posicion = this.listaTareas.findIndex( t => t.nombre === tarea.nombre);
-    this.listaTareas[posicion].completada = ! this.listaTareas[posicion].completada;
+  modificarTarea(tarea:Tarea){
+    this.firestore.collection('tareas')
+          .doc(tarea.id)
+          .set({completada: !tarea.completada }, { merge: true});
   }
 }
+
+
